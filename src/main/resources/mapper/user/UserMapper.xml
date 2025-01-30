@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.user.UserMapper">
+
+    <select id="findAuth" parameterType="String" resultType="com.mapago.model.user.User">
+        SELECT U.USER_ID
+        ,U.PASSWORD
+        ,U.USE_YN
+        FROM TB_USER U
+        WHERE U.USER_ID = #{userId}
+    </select>
+
+    <select id="findByUserId" parameterType="String" resultType="com.mapago.model.user.User">
+        SELECT
+        U.USER_ID,
+        U.USER_NM,
+        U.USE_YN,
+        U.EMAIL,
+        U.BIRTH_DAY,
+        U.NICKNAME,
+        U.GENDER,
+        U.KAKAO_ID,
+        U.APPLE_ID,
+        U.NAVER_ID,
+        U.PHONE_NUMBER,
+        U.PROFILE_IMAGE
+        FROM TB_USER U
+        WHERE U.USER_ID = #{userId}
+    </select>
+
+    <select id="findByNickname" parameterType="String" resultType="com.mapago.model.user.User">
+        SELECT
+        U.USER_ID,
+        U.USER_NM,
+        U.USE_YN,
+        U.EMAIL,
+        U.BIRTH_DAY,
+        U.NICKNAME,
+        U.GENDER,
+        U.KAKAO_ID,
+        U.APPLE_ID,
+        U.NAVER_ID,
+        U.PHONE_NUMBER,
+        U.PROFILE_IMAGE
+        FROM TB_USER U
+        WHERE U.NICKNAME = #{nickName}
+    </select>
+
+    <select id="findRolesByUserId" parameterType="String" resultType="String">
+        SELECT R.ROLE_NAME
+        FROM TB_ROLE R
+        JOIN TB_USER_ROLE UR ON R.ROLE_ID = UR.ROLE_ID
+        JOIN TB_USER U ON UR.USER_ID = U.USER_ID
+        WHERE U.USER_ID = #{userId}
+    </select>
+
+    <select id="getUserList" resultType="com.mapago.model.user.User">
+        SELECT
+        U.*
+        FROM TB_USER U
+    </select>
+
+    <update id="updateUser" parameterType="com.mapago.model.user.User" useGeneratedKeys="true"
+            keyProperty="userId">
+        UPDATE TB_USER
+        SET
+        USE_YN = #{useYn}
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <insert id="insertUser" parameterType="com.mapago.model.user.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO TB_USER (USER_ID, USER_NM, PASSWORD, CRE_ID, UPD_ID, USE_YN, EMAIL, NICKNAME)
+        VALUES(
+        #{userId},
+        #{userNm},
+        #{password},
+        #{userId},
+        #{userId},
+        'Y',
+        #{email},
+        #{nickname}
+        )
+    </insert>
+
+    <insert id="insertUserRole" parameterType="com.mapago.model.user.User" useGeneratedKeys="true">
+        INSERT INTO TB_USER_ROLE (USER_ID, ROLE_ID, CRE_ID, UPD_ID)
+        VALUES(
+        #{userId},
+        (SELECT B.ROLE_ID FROM TB_ROLE B WHERE B.ROLE_NAME = #{roleName}),
+        CASE WHEN #{creId} IS NOT NULL AND #{creId} != '' THEN #{creId} ELSE #{userId} END,
+        CASE WHEN #{updId} IS NOT NULL AND #{updId} != '' THEN #{updId} ELSE #{userId} END
+        )
+    </insert>
+</mapper>

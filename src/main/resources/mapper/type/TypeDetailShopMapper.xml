@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.type.TypeDetailShopMapper">
+
+    <resultMap id="ShopResultMap" type="com.mapago.model.shop.Shop">
+        <id property="shopId" column="shop_id"/>
+        <result property="shopNm" column="shop_nm"/>
+        <result property="shopTitle" column="shop_title"/>
+        <result property="areaProvinceNm" column="area_province_nm"/>
+        <result property="areaCityNm" column="area_city_nm"/>
+        <result property="areaStreetNm" column="area_street_nm"/>
+        <result property="firstFileUrl" column="first_file_url"/>
+
+    </resultMap>
+
+    <resultMap id="TypeDetailShopResultMap" type="com.mapago.model.type.TypeDetailShop">
+        <id property="typeDetailShopId" column="type_detail_shop_id"/>
+        <result property="typeDetailId" column="shop_type_detail_id"/>
+        <result property="dispOrd" column="shop_disp_ord"/>
+
+        <association property="shop" javaType="com.mapago.model.shop.Shop" resultMap="ShopResultMap"/>
+    </resultMap>
+
+    <select id="findTypeDetailShopListWithInfos" resultMap="TypeDetailShopResultMap">
+        SELECT
+        A.TYPE_DETAIL_ID,
+        A.TYPE_DETAIL_SHOP_ID,
+        A.DISP_ORD,
+        B.SHOP_ID,
+        B.SHOP_NM,
+        B.SHOP_TITLE,
+        B.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE C WHERE B.AREA_PROVINCE_ID = C.AREA_PROVINCE_ID)
+        AREA_PROVINCE_NM,
+        B.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY C WHERE B.AREA_CITY_ID = C.AREA_CITY_ID) AREA_CITY_NM,
+        B.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET C WHERE B.AREA_STREET_ID = C.AREA_STREET_ID) AREA_STREET_NM,
+        CASE WHEN B.FILE_ID_LIST IS NOT NULL AND B.FILE_ID_LIST != '' THEN
+        (
+        SELECT CONCAT('${tencentCosUrl}', '/', C.FILE_PATH, C.SYS_FILE_NAME)
+        FROM
+        TB_FILE C
+        WHERE
+        C.FILE_ID = SUBSTRING_INDEX(B.FILE_ID_LIST, ',', 1)
+        LIMIT 1
+        ) ELSE NULL END AS FIRST_FILE_URL
+        FROM TB_TYPE_DETAIL_SHOP A, TB_SHOP B
+        WHERE A.TYPE_DETAIL_ID = #{typeDetailId}
+        AND A.SHOP_ID = B.SHOP_ID
+        ORDER BY A.DISP_ORD
+    </select>
+
+    <insert id="insertTypeDetailShop" parameterType="com.mapago.model.type.TypeDetailShop" useGeneratedKeys="true"
+            keyProperty="typeDetailShopId">
+        INSERT INTO TB_TYPE_DETAIL_SHOP (TYPE_DETAIL_ID, SHOP_ID, DISP_ORD, CRE_ID, UPD_ID)
+        VALUES (
+        #{typeDetailId},
+        #{shopId},
+        (SELECT COALESCE(MAX(B.DISP_ORD), 0) + 1 FROM TB_TYPE_DETAIL_SHOP B WHERE B.TYPE_DETAIL_ID = #{typeDetailId}),
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <delete id="deleteTypeDetailShop" parameterType="com.mapago.model.type.TypeDetailShop">
+        DELETE FROM TB_TYPE_DETAIL_SHOP
+        WHERE TYPE_DETAIL_SHOP_ID = #{typeDetailShopId}
+    </delete>
+
+    <update id="sortTypeDetailShop" parameterType="com.mapago.model.type.TypeDetailShop" useGeneratedKeys="true"
+            keyProperty="typeDetailShopId">
+        UPDATE TB_TYPE_DETAIL_SHOP
+        SET
+        DISP_ORD = #{dispOrd},
+        UPD_ID = #{updId}
+        WHERE TYPE_DETAIL_SHOP_ID = #{typeDetailShopId}
+    </update>
+
+    <resultMap id="displayTypeDetailResultMap" type="com.mapago.model.type.TypeDetailShop">
+        <id property="typeDetailId" column="TYPE_DETAIL_ID"/>
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="typeDetailShopId" column="TYPE_DETAIL_SHOP_ID"/>
+        <result property="dispOrd" column="DISP_ORD"/>
+        <result property="typeDetailNmList" column="TYPE_DETAIL_NM_LIST"/>
+
+        <result property="shop.shopId" column="SHOP_ID"/>
+        <result property="shop.shopNm" column="SHOP_NM"/>
+        <result property="shop.shopTitle" column="SHOP_TITLE"/>
+        <result property="shop.areaProvinceId" column="AREA_PROVINCE_ID"/>
+        <result property="shop.areaProvinceNm" column="AREA_PROVINCE_NM"/>
+        <result property="shop.areaCityId" column="AREA_CITY_ID"/>
+        <result property="shop.areaCityNm" column="AREA_CITY_NM"/>
+        <result property="shop.areaStreetId" column="AREA_STREET_ID"/>
+        <result property="shop.areaStreetNm" column="AREA_STREET_NM"/>
+        <result property="shop.firstFileUrl" column="FIRST_FILE_URL"/>
+        <result property="shop.refreshDt" column="REFRESH_DT"/>
+        <result property="shop.phoneNum" column="PHONE_NUM"/>
+        <result property="shop.phoneBizNum" column="PHONE_BIZ_NUM"/>
+    </resultMap>
+
+    <select id="findDisplayShopList" resultMap="displayTypeDetailResultMap">
+        SELECT
+        E.TYPE_ID,
+        A.TYPE_DETAIL_ID,
+        A.TYPE_DETAIL_SHOP_ID,
+        A.DISP_ORD,
+        B.REFRESH_DT,
+        B.SHOP_ID,
+        B.SHOP_NM,
+        B.SHOP_TITLE,
+        B.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE C WHERE B.AREA_PROVINCE_ID = C.AREA_PROVINCE_ID) AS
+        AREA_PROVINCE_NM,
+        B.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY C WHERE B.AREA_CITY_ID = C.AREA_CITY_ID) AS AREA_CITY_NM,
+        B.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET C WHERE B.AREA_STREET_ID = C.AREA_STREET_ID) AS AREA_STREET_NM,
+        CASE WHEN B.FILE_ID_LIST IS NOT NULL AND B.FILE_ID_LIST != '' THEN
+        (
+        SELECT CONCAT('${tencentCosUrl}', '/', C.FILE_PATH, C.SYS_FILE_NAME)
+        FROM TB_FILE C
+        WHERE C.FILE_ID = SUBSTRING_INDEX(B.FILE_ID_LIST, ',', 1)
+        LIMIT 1
+        )
+        ELSE NULL END AS FIRST_FILE_URL,
+        (SELECT GROUP_CONCAT(D2.TYPE_DETAIL_NM ORDER BY A2.DISP_ORD ASC SEPARATOR '||')
+        FROM TB_TYPE_DETAIL_SHOP A2
+        JOIN TB_TYPE_DETAIL D2 ON A2.TYPE_DETAIL_ID = D2.TYPE_DETAIL_ID
+        WHERE A2.SHOP_ID = A.SHOP_ID
+        ) AS TYPE_DETAIL_NM_LIST,
+        B.PHONE_NUM,
+        B.PHONE_BIZ_NUM
+        FROM
+        TB_TYPE_DETAIL_SHOP A
+        JOIN
+        TB_SHOP B ON A.SHOP_ID = B.SHOP_ID
+        JOIN
+        TB_TYPE_DETAIL D ON A.TYPE_DETAIL_ID = D.TYPE_DETAIL_ID
+        JOIN
+        TB_TYPE E ON D.TYPE_ID = E.TYPE_ID
+        <where>
+            <if test="typeId != null and typeId != ''">
+                AND D.TYPE_ID = #{typeId}
+            </if>
+            <if test="typeDetailId != null and typeDetailId != ''">
+                AND D.TYPE_DETAIL_ID = #{typeDetailId}
+            </if>
+            <if test="search != null and search != ''">
+                AND (B.SHOP_NM LIKE CONCAT('%', #{search}, '%')
+                OR B.SHOP_TITLE LIKE CONCAT('%', #{search}, '%'))
+            </if>
+        </where>
+        GROUP BY
+        A.SHOP_ID
+        ORDER BY
+        CASE WHEN E.TYPE_ORD_METHOD = 'DISP_ORD' THEN MIN(A.DISP_ORD) END ASC,
+        CASE WHEN E.TYPE_ORD_METHOD = 'REFRESH_DT' THEN MAX(B.REFRESH_DT) END DESC
+    </select>
+
+    <select id="findRecommendShopList" resultMap="displayTypeDetailResultMap">
+        SELECT
+        E.TYPE_ID,
+        A.TYPE_DETAIL_ID,
+        A.TYPE_DETAIL_SHOP_ID,
+        A.DISP_ORD,
+        B.REFRESH_DT,
+        B.SHOP_ID,
+        B.SHOP_NM,
+        B.SHOP_TITLE,
+        B.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE C WHERE B.AREA_PROVINCE_ID = C.AREA_PROVINCE_ID) AS
+        AREA_PROVINCE_NM,
+        B.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY C WHERE B.AREA_CITY_ID = C.AREA_CITY_ID) AS AREA_CITY_NM,
+        B.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET C WHERE B.AREA_STREET_ID = C.AREA_STREET_ID) AS AREA_STREET_NM,
+        CASE WHEN B.FILE_ID_LIST IS NOT NULL AND B.FILE_ID_LIST != '' THEN
+        (
+        SELECT CONCAT('${tencentCosUrl}', '/', C.FILE_PATH, C.SYS_FILE_NAME)
+        FROM TB_FILE C
+        WHERE C.FILE_ID = SUBSTRING_INDEX(B.FILE_ID_LIST, ',', 1)
+        LIMIT 1
+        )
+        ELSE NULL END AS FIRST_FILE_URL,
+        (SELECT GROUP_CONCAT(D2.TYPE_DETAIL_NM ORDER BY A2.DISP_ORD ASC SEPARATOR '||')
+        FROM TB_TYPE_DETAIL_SHOP A2
+        JOIN TB_TYPE_DETAIL D2 ON A2.TYPE_DETAIL_ID = D2.TYPE_DETAIL_ID
+        WHERE A2.SHOP_ID = A.SHOP_ID
+        ) AS TYPE_DETAIL_NM_LIST,
+        B.VIEW_CNT,
+        CASE
+        WHEN A.DISP_ORD = 1 THEN 3
+        WHEN A.DISP_ORD = 2 THEN 1
+        ELSE 0
+        END AS SCORE,
+        B.PHONE_NUM,
+        B.PHONE_BIZ_NUM
+        FROM
+        TB_TYPE_DETAIL_SHOP A
+        JOIN
+        TB_SHOP B ON A.SHOP_ID = B.SHOP_ID
+        JOIN
+        TB_TYPE_DETAIL D ON A.TYPE_DETAIL_ID = D.TYPE_DETAIL_ID
+        JOIN
+        TB_TYPE E ON D.TYPE_ID = E.TYPE_ID
+        WHERE
+        <![CDATA[
+        A.DISP_ORD <= 2
+        ]]>
+        GROUP BY
+        A.SHOP_ID
+        ORDER BY
+        SCORE DESC,
+        B.VIEW_CNT DESC
+        LIMIT 16
+    </select>
+
+</mapper>

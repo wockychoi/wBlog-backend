@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.partnership.PartnershipMapper">
+
+    <insert id="insertPartnership" parameterType="com.mapago.model.partnership.Partnership" useGeneratedKeys="true"
+            keyProperty="userId">
+        INSERT INTO TB_PARTNERSHIP (USER_ID, CRE_ID, UPD_ID)
+        VALUES(
+        #{userId},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updatePartnershipFiles" parameterType="com.mapago.model.partnership.Partnership" useGeneratedKeys="true"
+            keyProperty="userId">
+        UPDATE TB_PARTNERSHIP
+        SET
+        FILE_ID_LIST = #{fileIdList},
+        BIZ_LIC_FILE_ID = #{bizLicFileId},
+        UPD_ID = #{updId}
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <update id="updatePartnershipYn" parameterType="com.mapago.model.partnership.Partnership" useGeneratedKeys="true"
+            keyProperty="userId">
+        UPDATE TB_PARTNERSHIP
+        SET
+        PARTNER_YN = #{partnerYn},
+        UPD_ID = #{updId}
+        WHERE USER_ID = #{userId}
+    </update>
+
+</mapper>

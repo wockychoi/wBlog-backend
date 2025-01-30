@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.category.CategoryMapper">
+
+    <select id="findCategoryList" parameterType="com.mapago.model.category.Category"
+            resultType="com.mapago.model.category.Category">
+        SELECT
+        A.CATEGORY_ID,
+        A.CATEGORY_NM,
+        A.DISP_ORD,
+        A.ICON_IMG,
+        A.LEFT_YN,
+        A.TOP_YN
+        <if test="noCount != true">
+            ,(SELECT COUNT(1) FROM TB_TYPE B WHERE B.CATEGORY_ID = A.CATEGORY_ID) TYPE_CNT,
+            (SELECT COUNT(1) FROM TB_TYPE B, TB_TYPE_DETAIL C WHERE A.CATEGORY_ID = B.CATEGORY_ID AND B.TYPE_ID =
+            C.TYPE_ID) TYPE_DETAIL_CNT,
+            (SELECT COUNT(1) FROM TB_TYPE B, TB_TYPE_DETAIL C, TB_TYPE_DETAIL_SHOP D WHERE A.CATEGORY_ID = B.CATEGORY_ID
+            AND
+            B.TYPE_ID = C.TYPE_ID and C.TYPE_DETAIL_ID = D.TYPE_DETAIL_ID) TYPE_DETAIL_SHOP_CNT
+        </if>
+        FROM TB_CATEGORY A
+        ORDER BY A.DISP_ORD
+    </select>
+
+    <insert id="insertCategory" parameterType="com.mapago.model.category.Category" useGeneratedKeys="true"
+            keyProperty="categoryId">
+        INSERT INTO TB_CATEGORY (CATEGORY_NM, DISP_ORD, ICON_IMG, LEFT_YN, TOP_YN, CRE_ID, UPD_ID)
+        VALUES(
+        #{categoryNm},
+        (SELECT COALESCE(MAX(B.DISP_ORD), 0) + 1 FROM TB_CATEGORY B),
+        #{iconImg},
+        #{leftYn},
+        #{topYn},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updateCategory" parameterType="com.mapago.model.category.Category" useGeneratedKeys="true"
+            keyProperty="categoryId">
+        UPDATE TB_CATEGORY
+        SET
+        CATEGORY_NM = #{categoryNm},
+        ICON_IMG = #{iconImg},
+        LEFT_YN = #{leftYn},
+        TOP_YN = #{topYn},
+        UPD_ID = #{updId}
+        WHERE CATEGORY_ID = #{categoryId}
+    </update>
+
+    <delete id="deleteCategory" parameterType="com.mapago.model.category.Category">
+        DELETE FROM TB_CATEGORY
+        WHERE CATEGORY_ID = #{categoryId}
+    </delete>
+
+    <update id="sortCategory" parameterType="com.mapago.model.category.Category" useGeneratedKeys="true"
+            keyProperty="categoryId">
+        UPDATE TB_CATEGORY
+        SET
+        DISP_ORD = #{dispOrd},
+        UPD_ID = #{updId}
+        WHERE CATEGORY_ID = #{categoryId}
+    </update>
+
+    <resultMap id="CategoryWithTypeResultMap" type="com.mapago.model.category.Category">
+        <id property="categoryId" column="category_id"/>
+        <result property="categoryNm" column="category_nm"/>
+        <result property="dispOrd" column="disp_ord"/>
+        <result property="iconImg" column="icon_img"/>
+        <result property="leftYn" column="left_yn"/>
+        <result property="topYn" column="top_yn"/>
+        <result property="route" column="route"/>
+        <collection property="typeList" ofType="com.mapago.model.type.Type" notNullColumn="type_id">
+            <id property="typeId" column="type_id"/>
+            <result property="typeNm" column="type_nm"/>
+            <result property="dispOrd" column="type_disp_ord"/>
+            <result property="categoryId" column="category_id"/>
+            <result property="typeForm" column="type_form"/>
+            <result property="typeOrdMethod" column="type_ord_method"/>
+        </collection>
+    </resultMap>
+
+    <select id="findCategoryTree" resultMap="CategoryWithTypeResultMap">
+        SELECT
+        C.CATEGORY_ID,
+        C.CATEGORY_NM,
+        C.DISP_ORD,
+        C.ICON_IMG,
+        C.LEFT_YN,
+        C.TOP_YN,
+        C.ROUTE,
+        T.TYPE_ID,
+        T.TYPE_NM,
+        T.DISP_ORD AS TYPE_DISP_ORD,
+        T.CATEGORY_ID,
+        T.TYPE_FORM,
+        T.TYPE_ORD_METHOD
+        FROM
+        TB_CATEGORY C
+        LEFT JOIN TB_TYPE T ON C.CATEGORY_ID = T.CATEGORY_ID
+        <where>
+            <if test="leftYn != null and leftYn != ''">
+                AND C.LEFT_YN = #{leftYn}
+            </if>
+            <if test="topYn != null and topYn != ''">
+                AND C.TOP_YN = #{topYn}
+            </if>
+        </where>
+        ORDER BY C.DISP_ORD,T.DISP_ORD
+    </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.commonCode.CommonCodeMapper">
+
+    <select id="findCommonCodeList" parameterType="com.mapago.model.commonCode.CommonCode"
+            resultType="com.mapago.model.commonCode.CommonCode">
+        SELECT
+        A.CODE_GRP,
+        A.CODE,
+        A.CODE_NM,
+        A.DISP_ORD
+        FROM TB_COMMON_CODE A
+        <where>
+            <if test="code != null and code != ''">
+                AND CODE = #{code}
+            </if>
+            <if test="codeGrp != null and codeGrp != ''">
+                AND CODE_GRP = #{codeGrp}
+            </if>
+            <if test="codeNm != null and codeNm != ''">
+                AND CODE_NM = #{codeNm}
+            </if>
+        </where>
+        ORDER BY DISP_ORD
+    </select>
+
+    <insert id="insertCommonCode" parameterType="com.mapago.model.commonCode.CommonCode" useGeneratedKeys="true"
+            keyProperty="commonCodeId">
+        INSERT INTO TB_COMMON_CODE (CODE_GRP, CODE, CODE_NM, DISP_ORD, CRE_ID, UPD_ID)
+        VALUES(
+        #{codeGrp},
+        #{code},
+        #{codeNm},
+        (SELECT COALESCE(MAX(B.DISP_ORD), 0) + 1 FROM TB_COMMON_CODE B AND B.CODE_GRP = #{codeGrp}),
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updateCommonCode" parameterType="com.mapago.model.commonCode.CommonCode" useGeneratedKeys="true"
+            keyProperty="commonCodeId">
+        UPDATE TB_COMMON_CODE
+        SET
+        CODE_NM = #{codeNm},
+        UPD_ID = #{updId}
+        WHERE CODE = #{code}
+    </update>
+
+    <delete id="deleteCommonCode" parameterType="com.mapago.model.commonCode.CommonCode">
+        DELETE FROM TB_COMMON_CODE
+        WHERE CODE = #{code}
+    </delete>
+
+
+    <update id="sortCommonCode" parameterType="com.mapago.model.commonCode.CommonCode" useGeneratedKeys="true"
+            keyProperty="commonCodeId">
+        UPDATE TB_COMMON_CODE
+        SET
+        DISP_ORD = #{dispOrd},
+        UPD_ID = #{updId}
+        WHERE CODE = #{code}
+    </update>
+
+</mapper>

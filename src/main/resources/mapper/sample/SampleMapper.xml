@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.sample.SampleMapper">
+
+    <select id="findSampleList" resultType="com.mapago.model.sample.Sample">
+        SELECT  <!-- SampleMapper.findSampleList -->
+        *
+        FROM TB_SAMPLE
+    </select>
+
+    <select id="findSampleById" parameterType="int" resultType="com.mapago.model.sample.Sample">
+        SELECT  <!-- SampleMapper.findSampleById -->
+        *
+        FROM TB_SAMPLE
+        WHERE SAMPLE_ID = #{sampleId}
+    </select>
+
+    <insert id="migFile" parameterType="com.mapago.model.sample.Sample" useGeneratedKeys="true" keyProperty="fileId"
+            keyColumn="file_id">
+        INSERT INTO mapago.tb_file
+        (sys_file_name, user_file_name, file_path, file_size, file_ext,cre_id,upd_id)
+        VALUES( #{sysFileNameM}, #{userFileNameM}, #{filePathM}, #{fileSizeM}, #{fileExtM}, #{creId}, #{updId} );
+    </insert>
+
+
+    <update id="saveShop" parameterType="com.mapago.model.sample.Sample">
+        UPDATE TB_SHOP
+        SET file_id_list = #{fileIdList}
+        WHERE shop_id = #{shopId}
+    </update>
+
+</mapper>

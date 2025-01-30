@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.shop.ShopMapper">
+
+    <resultMap id="ShopResultMap" type="com.mapago.model.shop.Shop">
+        <id property="shopId" column="SHOP_ID"/>
+        <result property="shopNm" column="SHOP_NM"/>
+        <result property="shopTitle" column="SHOP_TITLE"/>
+        <result property="shopTitleColor" column="SHOP_TITLE_COLOR"/>
+        <result property="content" column="CONTENT"/>
+        <result property="areaProvinceId" column="AREA_PROVINCE_ID"/>
+        <result property="areaProvinceNm" column="AREA_PROVINCE_NM"/>
+        <result property="areaCityId" column="AREA_CITY_ID"/>
+        <result property="areaCityNm" column="AREA_CITY_NM"/>
+        <result property="areaStreetId" column="AREA_STREET_ID"/>
+        <result property="areaStreetNm" column="AREA_STREET_NM"/>
+        <result property="shopType" column="SHOP_TYPE"/>
+        <result property="phoneNum" column="PHONE_NUM"/>
+        <result property="phoneBizNum" column="PHONE_BIZ_NUM"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="dtlAddress" column="DTL_ADDRESS"/>
+        <result property="operationTime" column="OPERATION_TIME"/>
+        <result property="email" column="EMAIL"/>
+        <result property="viewCnt" column="VIEW_CNT"/>
+        <result property="likeCnt" column="LIKE_CNT"/>
+        <result property="closeYn" column="CLOSE_YN"/>
+        <result property="oneOwnerYn" column="ONE_OWNER_YN"/>
+        <result property="oneOwner" column="ONE_OWNER"/>
+        <result property="manOnlyYn" column="MAN_ONLY_YN"/>
+        <result property="manOnly" column="MAN_ONLY"/>
+        <result property="womanOnlyYn" column="womanOnlyYn"/>
+        <result property="womanOnly" column="WOMAN_ONLY"/>
+        <result property="commentIdList" column="COMMENT_ID_LIST"/>
+        <result property="refreshDt" column="REFRESH_DT"/>
+        <collection property="fileList" ofType="com.mapago.model.file.File" column="file_id_list"
+                    select="com.mapago.mapper.file.FileMapper.selectFilesByFileIds"/>
+    </resultMap>
+
+    <select id="findShopList" resultMap="ShopResultMap">
+        SELECT
+        A.SHOP_ID,
+        A.SHOP_NM,
+        A.SHOP_TITLE,
+        A.SHOP_TITLE_COLOR,
+        A.CONTENT,
+        A.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE B WHERE A.AREA_PROVINCE_ID = B.AREA_PROVINCE_ID)
+        AREA_PROVINCE_NM,
+        A.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY B WHERE A.AREA_CITY_ID = B.AREA_CITY_ID) AREA_CITY_NM,
+        A.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET B WHERE A.AREA_STREET_ID = B.AREA_STREET_ID) AREA_STREET_NM,
+        A.SHOP_TYPE,
+        A.PHONE_NUM,
+        A.PHONE_BIZ_NUM,
+        A.ADDRESS,
+        A.DTL_ADDRESS,
+        A.OPERATION_TIME,
+        A.EMAIL,
+        A.VIEW_CNT,
+        A.LIKE_CNT,
+        A.CLOSE_YN,
+        A.ONE_OWNER_YN,
+        (CASE WHEN A.ONE_OWNER_YN = 'Y' THEN TRUE ELSE FALSE END ) ONE_OWNER,
+        A.MAN_ONLY_YN,
+        (CASE WHEN A.MAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) MAN_ONLY,
+        A.WOMAN_ONLY_YN,
+        (CASE WHEN A.WOMAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) WOMAN_ONLY,
+        A.FILE_ID_LIST,
+        A.COMMENT_ID_LIST,
+        A.CRE_DT,
+        A.CRE_ID,
+        A.UPD_DT,
+        A.UPD_ID,
+        A.USE_YN,
+        A.REFRESH_DT
+        FROM TB_SHOP A
+        <where>
+            <if test="shopNm != null and shopNm != ''">
+                AND (A.SHOP_NM LIKE CONCAT('%', #{shopNm}, '%')
+                OR A.SHOP_TITLE LIKE CONCAT('%', #{shopNm}, '%'))
+            </if>
+            <if test="areaProvinceId != null and areaProvinceId != ''">
+                AND A.AREA_PROVINCE_ID = #{areaProvinceId}
+            </if>
+            <if test="areaCityId != null and areaCityId != ''">
+                AND A.AREA_CITY_ID = #{areaCityId}
+            </if>
+            <if test="areaStreetId != null and areaStreetId != ''">
+                AND A.AREA_STREET_ID = #{areaStreetId}
+            </if>
+            <if test="oneOwnerYn != null and oneOwnerYn != ''">
+                AND A.ONE_OWNER_YN = #{oneOwnerYn}
+            </if>
+            <if test="manOnlyYn != null and manOnlyYn != ''">
+                AND A.MAN_ONLY_YN = #{manOnlyYn}
+            </if>
+            <if test="womanOnlyYn != null and womanOnlyYn != ''">
+                AND A.WOMAN_ONLY_YN = #{womanOnlyYn}
+            </if>
+            AND A.USE_YN = 'Y'
+        </where>
+        ORDER BY A.SHOP_ID DESC
+    </select>
+
+    <select id="findShop" resultMap="ShopResultMap">
+        SELECT
+        A.SHOP_ID,
+        A.SHOP_NM,
+        A.SHOP_TITLE,
+        A.SHOP_TITLE_COLOR,
+        A.CONTENT,
+        A.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE B WHERE A.AREA_PROVINCE_ID = B.AREA_PROVINCE_ID)
+        AREA_PROVINCE_NM,
+        A.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY B WHERE A.AREA_CITY_ID = B.AREA_CITY_ID) AREA_CITY_NM,
+        A.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET B WHERE A.AREA_STREET_ID = B.AREA_STREET_ID) AREA_STREET_NM,
+        A.SHOP_TYPE,
+        A.PHONE_NUM,
+        A.PHONE_BIZ_NUM,
+        A.ADDRESS,
+        A.DTL_ADDRESS,
+        A.OPERATION_TIME,
+        A.EMAIL,
+        A.VIEW_CNT,
+        A.LIKE_CNT,
+        A.CLOSE_YN,
+        A.ONE_OWNER_YN,
+        (CASE WHEN A.ONE_OWNER_YN = 'Y' THEN TRUE ELSE FALSE END ) ONE_OWNER,
+        A.MAN_ONLY_YN,
+        (CASE WHEN A.MAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) MAN_ONLY,
+        A.WOMAN_ONLY_YN,
+        (CASE WHEN A.WOMAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) WOMAN_ONLY,
+        A.FILE_ID_LIST,
+        A.COMMENT_ID_LIST,
+        A.CRE_DT,
+        A.CRE_ID,
+        A.UPD_DT,
+        A.UPD_ID,
+        A.USE_YN,
+        A.REFRESH_DT,
+        (SELECT GROUP_CONCAT(D2.TYPE_DETAIL_NM ORDER BY A2.DISP_ORD ASC SEPARATOR '||')
+        FROM TB_TYPE_DETAIL_SHOP A2
+        JOIN TB_TYPE_DETAIL D2 ON A2.TYPE_DETAIL_ID = D2.TYPE_DETAIL_ID
+        WHERE A2.SHOP_ID = A.SHOP_ID
+        ) AS TYPE_DETAIL_NM_LIST
+        FROM TB_SHOP A
+        WHERE A.SHOP_ID = #{shopId}
+    </select>
+
+    <select id="findShopListAll" resultType="com.mapago.model.shop.Shop">
+        SELECT
+        A.SHOP_ID,
+        A.SHOP_NM,
+        A.SHOP_TITLE,
+        A.SHOP_TITLE_COLOR,
+        A.CONTENT,
+        A.AREA_PROVINCE_ID,
+        (SELECT AREA_PROVINCE_NM FROM TB_AREA_PROVINCE B WHERE A.AREA_PROVINCE_ID = B.AREA_PROVINCE_ID)
+        AREA_PROVINCE_NM,
+        A.AREA_CITY_ID,
+        (SELECT AREA_CITY_NM FROM TB_AREA_CITY B WHERE A.AREA_CITY_ID = B.AREA_CITY_ID) AREA_CITY_NM,
+        A.AREA_STREET_ID,
+        (SELECT AREA_STREET_NM FROM TB_AREA_STREET B WHERE A.AREA_STREET_ID = B.AREA_STREET_ID) AREA_STREET_NM,
+        A.SHOP_TYPE,
+        A.PHONE_NUM,
+        A.PHONE_BIZ_NUM,
+        A.ADDRESS,
+        A.DTL_ADDRESS,
+        A.OPERATION_TIME,
+        A.EMAIL,
+        A.VIEW_CNT,
+        A.LIKE_CNT,
+        A.CLOSE_YN,
+        A.ONE_OWNER_YN,
+        (CASE WHEN A.ONE_OWNER_YN = 'Y' THEN TRUE ELSE FALSE END ) ONE_OWNER,
+        A.MAN_ONLY_YN,
+        (CASE WHEN A.MAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) MAN_ONLY,
+        A.WOMAN_ONLY_YN,
+        (CASE WHEN A.WOMAN_ONLY_YN = 'Y' THEN TRUE ELSE FALSE END ) WOMAN_ONLY,
+        A.FILE_ID_LIST,
+        A.COMMENT_ID_LIST,
+        A.CRE_DT,
+        A.CRE_ID,
+        A.UPD_DT,
+        A.UPD_ID,
+        A.USE_YN,
+        A.REFRESH_DT
+        FROM TB_SHOP A
+        WHERE A.USE_YN = 'Y'
+        ORDER BY A.SHOP_ID ASC
+    </select>
+
+    <insert id="insertShop" parameterType="com.mapago.model.shop.Shop" useGeneratedKeys="true" keyProperty="shopId">
+        INSERT INTO TB_SHOP (SHOP_NM, SHOP_TITLE, CONTENT, AREA_PROVINCE_ID, AREA_CITY_ID, AREA_STREET_ID, SHOP_TYPE,
+        PHONE_NUM, ADDRESS,
+        DTL_ADDRESS, OPERATION_TIME, EMAIL, VIEW_CNT, LIKE_CNT, CLOSE_YN, ONE_OWNER_YN, MAN_ONLY_YN, WOMAN_ONLY_YN,
+        COMMENT_ID_LIST, CRE_ID, UPD_ID,
+        USE_YN)
+        VALUES(
+        #{shopNm},
+        #{shopTitle},
+        #{content},
+        #{areaProvinceId},
+        #{areaCityId},
+        #{areaStreetId},
+        #{shopType},
+        #{phoneNum},
+        #{address},
+        #{dtlAddress},
+        #{operationTime},
+        #{email},
+        0,
+        0,
+        #{closeYn},
+        #{oneOwnerYn},
+        #{manOnlyYn},
+        #{womanOnlyYn},
+        #{commentIdList},
+        #{creId},
+        #{updId},
+        'Y'
+        )
+    </insert>
+
+    <update id="updateShopFileIdList" parameterType="com.mapago.model.shop.Shop" useGeneratedKeys="true"
+            keyProperty="shopId">
+        UPDATE TB_SHOP
+        SET
+        FILE_ID_LIST = #{fileIdList},
+        UPD_ID = #{updId},
+        UPD_DT = NOW()
+        WHERE SHOP_ID = #{shopId}
+    </update>
+
+    <update id="updateShop" parameterType="com.mapago.model.shop.Shop" useGeneratedKeys="true" keyProperty="shopId">
+        UPDATE TB_SHOP
+        SET
+        SHOP_NM = #{shopNm},
+        SHOP_TITLE = #{shopTitle},
+        CONTENT = #{content},
+        AREA_PROVINCE_ID = #{areaProvinceId},
+        AREA_CITY_ID = #{areaCityId},
+        AREA_STREET_ID = #{areaStreetId},
+        SHOP_TYPE = #{shopType},
+        PHONE_NUM = #{phoneNum},
+        ADDRESS = #{address},
+        DTL_ADDRESS = #{dtlAddress},
+        OPERATION_TIME = #{operationTime},
+        EMAIL = #{email},
+        VIEW_CNT = #{viewCnt},
+        LIKE_CNT = #{likeCnt},
+        CLOSE_YN = #{closeYn},
+        ONE_OWNER_YN = #{oneOwnerYn},
+        MAN_ONLY_YN = #{manOnlyYn},
+        WOMAN_ONLY_YN = #{womanOnlyYn},
+        FILE_ID_LIST = #{fileIdList},
+        COMMENT_ID_LIST = #{commentIdList},
+        CRE_ID = #{creId},
+        UPD_DT = NOW(),
+        UPD_ID = #{updId}
+        WHERE SHOP_ID = #{shopId}
+    </update>
+
+    <update id="deleteShop" parameterType="com.mapago.model.shop.Shop">
+        UPDATE TB_SHOP A
+        SET
+        A.USE_YN = 'N',
+        A.UPD_DT = NOW(),
+        A.UPD_ID = #{updId}
+        WHERE A.SHOP_ID = #{shopId}
+    </update>
+
+    <update id="sortShopFileList" parameterType="com.mapago.model.shop.Shop" useGeneratedKeys="true"
+            keyProperty="shopId">
+        UPDATE TB_SHOP
+        SET
+        FILE_ID_LIST = #{fileIdList},
+        UPD_DT = NOW(),
+        UPD_ID = #{updId}
+        WHERE SHOP_ID = #{shopId}
+    </update>
+
+    <update id="shopBizCall" parameterType="com.mapago.model.shop.Shop" useGeneratedKeys="true"
+            keyProperty="shopId">
+        UPDATE TB_SHOP
+        SET
+        PHONE_BIZ_NUM = #{phoneBizNum}
+        WHERE SHOP_ID = #{shopId}
+    </update>
+
+    <select id="findOwnerShopList" resultType="com.mapago.model.shop.Shop">
+        SELECT
+        A.SHOP_ID,
+        A.SHOP_NM,
+        A.SHOP_TITLE
+        FROM TB_SHOP A
+        WHERE A.USE_YN = 'Y'
+        AND A.OWNER_USER_ID = #{ownerUserId}
+        ORDER BY A.SHOP_ID ASC
+    </select>
+
+    <update id="updateRefreshDt" parameterType="com.mapago.model.shop.Shop">
+        UPDATE TB_SHOP
+        SET
+        REFRESH_DT = NOW(),
+        UPD_DT = NOW(),
+        UPD_ID = #{updId}
+        WHERE SHOP_ID = #{shopId}
+    </update>
+
+</mapper>

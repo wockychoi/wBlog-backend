@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.msg.MsgMapper">
+
+    <select id="findMsgList" resultType="com.mapago.model.msg.Msg">
+        SELECT
+        A.MSG_ID,
+        A.SENDER_ID,
+        A.RECEIVER_ID,
+        A.SUBJECT,
+        A.CONTENT,
+        A.SEND_TIME,
+        A.IS_READ,
+        A.READ_TIME,
+        A.CRE_DT,
+        A.USE_YN
+        FROM TB_MESSAGE A
+        <where>
+            <if test="receiverId != null and receiverId != ''">
+                AND A.RECEIVER_ID = #{receiverId}
+            </if>
+            <if test="senderId != null and senderId != ''">
+                AND A.SENDER_ID = #{senderId}
+            </if>
+        </where>
+        ORDER BY CRE_DT DESC
+    </select>
+
+    <insert id="insertMsg" parameterType="com.mapago.model.msg.Msg" useGeneratedKeys="true"
+            keyProperty="msgId">
+        INSERT INTO TB_MESSAGE (sender_id, receiver_id, subject, content,send_time, is_read,use_yn)
+        VALUES(
+        #{senderId},
+        #{receiverId},
+        #{subject},
+        #{content},
+        sysdate(),
+        'N'.
+        'Y'
+        )
+    </insert>
+
+    <delete id="deleteMsg" parameterType="com.mapago.model.msg.Msg">
+        UPDATE TB_MESSAGE
+        SET USE_YN = #{useYn}
+        WHERE MSG_ID = #{msgId}
+    </delete>
+
+
+</mapper>

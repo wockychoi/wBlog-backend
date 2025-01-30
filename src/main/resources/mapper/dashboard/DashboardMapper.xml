@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.dashboard.DashboardMapper">
+
+    <select id="getTopLikeList" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        SHOP_ID,
+        SHOP_NM,
+        SHOP_TITLE,
+        CONTENT,
+        AREA_PROVINCE_ID,
+        AREA_CITY_ID,
+        AREA_STREET_ID,
+        SHOP_TYPE,
+        PHONE_NUM,
+        ADDRESS,
+        DTL_ADDRESS,
+        OPERATION_TIME,
+        EMAIL,
+        VIEW_CNT,
+        LIKE_CNT,
+        CLOSE_YN,
+        FILE_ID_LIST,
+        COMMENT_ID_LIST,
+        CRE_DT,
+        CRE_ID,
+        UPD_DT,
+        UPD_ID,
+        USE_YN,
+        ONE_OWNER_YN,
+        MAN_ONLY_YN,
+        WOMAN_ONLY_YN,
+        SHOP_TITLE_COLOR,
+        OWNER_USER_ID
+        FROM
+        TB_SHOP
+        ORDER BY
+        LIKE_CNT DESC
+        LIMIT 100
+    </select>
+
+    <select id="getTopViewList" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        SHOP_ID,
+        SHOP_NM,
+        SHOP_TITLE,
+        CONTENT,
+        AREA_PROVINCE_ID,
+        AREA_CITY_ID,
+        AREA_STREET_ID,
+        SHOP_TYPE,
+        PHONE_NUM,
+        ADDRESS,
+        DTL_ADDRESS,
+        OPERATION_TIME,
+        EMAIL,
+        VIEW_CNT,
+        LIKE_CNT,
+        CLOSE_YN,
+        FILE_ID_LIST,
+        COMMENT_ID_LIST,
+        CRE_DT,
+        CRE_ID,
+        UPD_DT,
+        UPD_ID,
+        USE_YN,
+        ONE_OWNER_YN,
+        MAN_ONLY_YN,
+        WOMAN_ONLY_YN,
+        SHOP_TITLE_COLOR,
+        OWNER_USER_ID
+        FROM
+        TB_SHOP
+        ORDER BY
+        VIEW_CNT DESC
+        LIMIT 100
+    </select>
+
+
+    <select id="getTopUserLoginList" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        @row_number := @row_number + 1 AS seq, -- 순번
+        log_type,
+        user_id,
+        log_count,
+        @rank := IF(@prev_user_id = user_id, @rank, @rank + 1) AS rank,
+        @prev_user_id := user_id AS prev_user_id
+        FROM (
+        SELECT
+        log_type,
+        user_id,
+        COUNT(*) AS log_count
+        FROM tb_user_log
+        WHERE log_type = 'login'
+        GROUP BY log_type, user_id
+        ORDER BY log_count DESC
+        ) AS ranked_logs
+        ORDER BY seq
+        LIMIT 100
+    </select>
+
+    <select id="getTopLogList" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        @row_number := @row_number + 1 AS seq, -- 순번
+        log_type,
+        user_id,
+        log_count,
+        @rank := IF(@prev_user_id = user_id, @rank, @rank + 1) AS rank,
+        @prev_user_id := user_id AS prev_user_id
+        FROM (
+        SELECT
+        log_type,
+        user_id,
+        COUNT(*) AS log_count
+        FROM tb_user_log
+        WHERE log_type = #{logType}
+        AND cre_dt BETWEEN #{fromDate} AND #{toDate}
+        GROUP BY log_type, user_id
+        ORDER BY log_count DESC
+        ) AS ranked_logs
+        CROSS JOIN (SELECT @row_number := 0) AS rn
+        ORDER BY rank
+        LIMIT 100
+    </select>
+
+    <select id="getTotalLoginUser" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        DATE_FORMAT(cre_dt, '%Y-%m') AS month, -- 월별
+        COUNT(*) AS log_count -- 로그인 수를 세기
+        FROM
+        tb_user_log
+        WHERE
+        log_type = 'login'
+        AND YEAR(cre_dt) = YEAR(CURDATE()) -- 현재 연도
+        GROUP BY
+        month
+        ORDER BY
+        month ASC
+    </select>
+
+    <select id="getRgstShop" resultType="com.mapago.model.dashboard.Dashboard">
+        select
+        A.SHOP_ID,
+        A.SHOP_NM,
+        A.SHOP_TITLE,
+        A.CONTENT,
+        A.AREA_PROVINCE_ID,
+        A.AREA_CITY_ID,
+        A.AREA_STREET_ID,
+        A.SHOP_TYPE,
+        A.PHONE_NUM,
+        A.PHONE_BIZ_NUM,
+        A.ADDRESS,
+        A.DTL_ADDRESS,
+        A.OPERATION_TIME,
+        A.EMAIL,
+        A.VIEW_CNT,
+        A.LIKE_CNT,
+        A.CLOSE_YN,
+        A.FILE_ID_LIST,
+        A.COMMENT_ID_LIST,
+        A.CRE_DT,
+        A.CRE_ID,
+        A.UPD_DT,
+        A.UPD_ID,
+        A.USE_YN,
+        A.ONE_OWNER_YN,
+        A.MAN_ONLY_YN,
+        A.WOMAN_ONLY_YN,
+        A.SHOP_TITLE_COLOR,
+        A.OWNER_USER_ID,
+        A.REFRESH_DT
+        from tb_shop A
+        order by cre_dt desc
+        limit 100
+    </select>
+
+    <select id="getTypePercentage" resultType="com.mapago.model.dashboard.Dashboard">
+        SELECT
+        log_type,
+        COUNT(*) AS log_count,
+        ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM tb_user_log)), 2) AS percentage
+        FROM
+        tb_user_log
+        GROUP BY
+        log_type
+        ORDER BY
+        percentage DESC;
+    </select>
+
+</mapper>

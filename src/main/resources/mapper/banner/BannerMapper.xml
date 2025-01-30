@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.banner.BannerMapper">
+
+    <resultMap id="BannerResultMap" type="com.mapago.model.banner.Banner">
+        <id property="bannerId" column="BANNER_ID"/>
+        <result property="bannerType" column="BANNER_TYPE"/>
+        <result property="bannerNm" column="BANNER_NM"/>
+        <result property="dispOrd" column="DISP_ORD"/>
+        <result property="bannerLink" column="BANNER_LINK"/>
+        <result property="strDt" column="STR_DT"/>
+        <result property="endDt" column="END_DT"/>
+        <result property="creDt" column="CRE_DT"/>
+        <result property="creId" column="CRE_ID"/>
+        <result property="updDt" column="UPD_DT"/>
+        <result property="updId" column="UPD_ID"/>
+
+        <association property="file" javaType="com.mapago.model.file.File"
+                     select="com.mapago.mapper.file.FileMapper.selectFilesByFileIds" column="FILE_ID"/>
+    </resultMap>
+
+    <select id="findBannerList" resultMap="BannerResultMap">
+        SELECT
+        A.BANNER_ID,
+        A.BANNER_TYPE,
+        A.BANNER_NM,
+        A.FILE_ID,
+        A.DISP_ORD,
+        A.BANNER_LINK,
+        A.STR_DT,
+        A.END_DT,
+        A.CRE_DT,
+        A.CRE_ID,
+        A.UPD_DT,
+        A.UPD_ID
+        FROM TB_BANNER A, TB_FILE B
+        WHERE A.FILE_ID = B.FILE_ID
+        ORDER BY A.DISP_ORD
+    </select>
+
+    <insert id="insertBanner" parameterType="com.mapago.model.banner.Banner" useGeneratedKeys="true"
+            keyProperty="bannerId">
+        INSERT INTO TB_BANNER (BANNER_TYPE, BANNER_NM, DISP_ORD, BANNER_LINK, STR_DT, END_DT, CRE_ID, UPD_ID)
+        VALUES(
+        #{bannerType},
+        #{bannerNm},
+        #{dispOrd},
+        #{bannerLink},
+        #{strDt},
+        #{endDt},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updateBannerFileId" parameterType="com.mapago.model.banner.Banner" useGeneratedKeys="true"
+            keyProperty="bannerId">
+        UPDATE TB_BANNER
+        SET
+        FILE_ID = #{fileId},
+        UPD_ID = #{updId}
+        WHERE BANNER_ID = #{bannerId}
+    </update>
+
+    <update id="updateBanner" parameterType="com.mapago.model.banner.Banner" useGeneratedKeys="true"
+            keyProperty="bannerId">
+        UPDATE TB_BANNER
+        SET
+        BANNER_TYPE = #{bannerType},
+        BANNER_NM = #{bannerNm},
+        BANNER_LINK = #{bannerLink},
+        STR_DT #{strDt},
+        END_DT #{endDt},
+        CRE_ID = #{creId},
+        UPD_ID = #{updId}
+        WHERE BANNER_ID = #{bannerId}
+    </update>
+
+    <delete id="deleteBanner" parameterType="com.mapago.model.banner.Banner">
+        DELETE FROM TB_BANNER
+        WHERE BANNER_ID = #{bannerId}
+    </delete>
+
+    <update id="sortBanner" parameterType="com.mapago.model.banner.Banner" useGeneratedKeys="true"
+            keyProperty="bannerId">
+        UPDATE TB_BANNER
+        SET
+        DISP_ORD = #{dispOrd},
+        UPD_ID = #{updId}
+        WHERE BANNER_ID = #{bannerId}
+    </update>
+
+</mapper>

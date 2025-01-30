@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.type.TypeNoticeMapper">
+
+    <resultMap id="TypeResultMap" type="com.mapago.model.type.Type">
+        <id property="typeId" column="type_id"/>
+        <result property="typeNm" column="type_nm"/>
+        <association property="category" javaType="com.mapago.model.category.Category" resultMap="CategoryResultMap"/>
+    </resultMap>
+
+    <resultMap id="CategoryResultMap" type="com.mapago.model.category.Category">
+        <id property="categoryId" column="category_id"/>
+        <result property="categoryNm" column="category_nm"/>
+    </resultMap>
+
+    <resultMap id="TypeNoticeResultMap" type="com.mapago.model.type.TypeNotice">
+        <id property="typeNoticeId" column="type_notice_id"/>
+        <result property="typeId" column="type_id"/>
+        <result property="noticeType" column="notice_type"/>
+        <result property="noticeTypeNm" column="notice_type_nm"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="refreshDt" column="refresh_dt"/>
+        <result property="viewCnt" column="view_cnt"/>
+        <result property="likeCnt" column="like_cnt"/>
+        <result property="creDt" column="cre_dt"/>
+        <result property="creId" column="cre_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="updDt" column="upd_dt"/>
+        <result property="updId" column="upd_id"/>
+        <!--        <result property="commentIdList" column="COMMENT_ID_LIST"/>-->
+        <association property="type" javaType="com.mapago.model.type.Type" resultMap="TypeResultMap"/>
+        <collection property="fileList" ofType="com.mapago.model.file.File" column="file_id_list"
+                    select="com.mapago.mapper.file.FileMapper.selectFilesByFileIds"/>
+    </resultMap>
+
+    <select id="findTypeNoticeList" resultMap="TypeNoticeResultMap">
+        SELECT
+        A.CATEGORY_ID,
+        A.CATEGORY_NM,
+        B.TYPE_ID,
+        B.TYPE_NM,
+        B.TYPE_FORM,
+        B.TYPE_ORD_METHOD,
+        C.TYPE_NOTICE_ID,
+        C.NOTICE_TYPE,
+        (SELECT Z.CODE_NM FROM TB_COMMON_CODE Z WHERE Z.CODE_GRP = 'NOTICE_TYPE' AND Z.CODE = C.NOTICE_TYPE)
+        NOTICE_TYPE_NM,
+        C.TITLE,
+        C.CONTENT,
+        C.USE_YN,
+        C.REFRESH_DT,
+        C.FILE_ID_LIST,
+        C.VIEW_CNT,
+        C.LIKE_CNT,
+        C.CRE_DT,
+        C.CRE_ID,
+        (SELECT D.NICKNAME FROM TB_USER D WHERE D.USER_ID = C.CRE_ID) NICKNAME,
+        C.UPD_DT,
+        C.UPD_ID
+        FROM TB_CATEGORY A, TB_TYPE B, TB_TYPE_NOTICE C
+        WHERE A.CATEGORY_ID = B.CATEGORY_ID
+        AND B.TYPE_ID = C.TYPE_ID
+        AND C.TYPE_ID = #{typeId}
+        <if test="search != null and search != ''">
+            AND (
+            C.TITLE LIKE CONCAT('%', #{search}, '%')
+            OR C.CONTENT LIKE CONCAT('%', #{search}, '%')
+            OR C.CRE_ID = (SELECT Z.USER_ID FROM TB_USER Z WHERE Z.USER_NM = #{search})
+            )
+        </if>
+        <if test="noticeType != null and noticeType != ''">
+            AND C.NOTICE_TYPE = #{noticeType}
+        </if>
+        AND C.USE_YN = 'Y'
+        ORDER BY C.REFRESH_DT DESC
+    </select>
+
+    <select id="findTypeNotice" resultMap="TypeNoticeResultMap">
+        SELECT
+        A.CATEGORY_ID,
+        A.CATEGORY_NM,
+        B.TYPE_ID,
+        B.TYPE_NM,
+        B.TYPE_FORM,
+        B.TYPE_ORD_METHOD,
+        C.TYPE_NOTICE_ID,
+        C.NOTICE_TYPE,
+        (SELECT Z.CODE_NM FROM TB_COMMON_CODE Z WHERE Z.CODE_GRP = 'NOTICE_TYPE' AND Z.CODE = C.NOTICE_TYPE)
+        NOTICE_TYPE_NM,
+        C.TITLE,
+        C.CONTENT,
+        C.USE_YN,
+        C.REFRESH_DT,
+        C.FILE_ID_LIST,
+        C.VIEW_CNT,
+        C.LIKE_CNT,
+        C.CRE_DT,
+        C.CRE_ID,
+        (SELECT D.NICKNAME FROM TB_USER D WHERE D.USER_ID = C.CRE_ID) NICKNAME,
+        C.UPD_DT,
+        C.UPD_ID
+        FROM TB_CATEGORY A, TB_TYPE B, TB_TYPE_NOTICE C
+        WHERE A.CATEGORY_ID = B.CATEGORY_ID
+        AND B.TYPE_ID = C.TYPE_ID
+        AND C.TYPE_NOTICE_ID = #{typeNoticeId}
+    </select>
+
+    <insert id="insertTypeNotice" parameterType="com.mapago.model.type.TypeNotice" useGeneratedKeys="true"
+            keyProperty="typeNoticeId">
+        INSERT INTO TB_TYPE_NOTICE (TYPE_ID, NOTICE_TYPE, TITLE, CONTENT, CRE_ID, UPD_ID)
+        VALUES (
+        #{typeId},
+        #{noticeType},
+        #{title},
+        #{content},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updateTypeNotice" parameterType="com.mapago.model.type.TypeNotice" useGeneratedKeys="true"
+            keyProperty="typeNoticeId">
+        UPDATE TB_TYPE_NOTICE A
+        SET
+        A.UPD_ID = #{updId},
+        A.NOTICE_TYPE = #{noticeType},
+        A.TITLE = #{title},
+        A.CONTENT = #{content}
+        WHERE A.TYPE_NOTICE_ID = #{typeNoticeId}
+    </update>
+
+    <update id="deleteTypeNotice" parameterType="com.mapago.model.type.TypeNotice">
+        UPDATE TB_TYPE_NOTICE A
+        SET
+        A.USE_YN = 'N',
+        A.UPD_DT = NOW(),
+        A.UPD_ID = #{updId}
+        WHERE TYPE_NOTICE_ID = #{typeNoticeId}
+    </update>
+
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.type.TypeMapper">
+
+    <select id="findTypeList" resultType="com.mapago.model.type.Type">
+        SELECT
+        TYPE_ID,
+        TYPE_NM,
+        CATEGORY_ID,
+        DISP_ORD,
+        TYPE_FORM,
+        TYPE_ORD_METHOD,
+        CRE_DT
+        FROM TB_TYPE
+        <where>
+            <if test="typeNm != null and typeNm != ''">
+                AND TYPE_NM = #{typeNm}
+            </if>
+            <if test="categoryId != null">
+                AND CATEGORY_ID = #{categoryId}
+            </if>
+            <if test="typeForm != null and typeForm != ''">
+                AND TYPE_FORM = #{typeForm}
+            </if>
+        </where>
+        ORDER BY DISP_ORD
+    </select>
+
+    <resultMap id="ShopResultMap" type="com.mapago.model.shop.Shop">
+        <id property="shopId" column="shop_id"/>
+        <result property="shopNm" column="shop_nm"/>
+        <result property="shopTitle" column="shop_title"/>
+    </resultMap>
+
+    <resultMap id="TypeDetailShopResultMap" type="com.mapago.model.type.TypeDetailShop">
+        <id property="typeDetailShopId" column="type_detail_shop_id"/>
+        <result property="typeDetailId" column="shop_type_detail_id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="dispOrd" column="shop_disp_ord"/>
+
+        <association property="shop" javaType="com.mapago.model.shop.Shop" resultMap="ShopResultMap"/>
+    </resultMap>
+
+    <resultMap id="TypeDetailResultMap" type="com.mapago.model.type.TypeDetail">
+        <id property="typeDetailId" column="type_detail_id"/>
+        <result property="typeDetailNm" column="type_detail_nm"/>
+        <result property="typeId" column="detail_type_id"/>
+        <result property="dispOrd" column="detail_disp_ord"/>
+
+        <collection property="typeDetailShopList" ofType="com.mapago.model.type.TypeDetailShop"
+                    resultMap="TypeDetailShopResultMap"/>
+    </resultMap>
+
+    <resultMap id="TypeResultMap" type="com.mapago.model.type.Type">
+        <id property="typeId" column="type_id"/>
+        <result property="typeNm" column="type_nm"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="dispOrd" column="disp_ord"/>
+        <result property="typeForm" column="type_form"/>
+        <result property="typeFormNm" column="type_form_nm"/>
+        <result property="typeOrdMethod" column="type_ord_method"/>
+        <result property="typeOrdMethodNm" column="type_ord_method_nm"/>
+        <result property="creDt" column="cre_dt"/>
+
+        <association property="category" javaType="com.mapago.model.category.Category">
+            <id property="categoryId" column="category_id"/>
+            <result property="categoryNm" column="category_nm"/>
+        </association>
+
+        <collection property="typeDetailList" ofType="com.mapago.model.type.TypeDetail"
+                    resultMap="TypeDetailResultMap"/>
+    </resultMap>
+
+    <select id="findTypeListWithInfos" resultMap="TypeResultMap">
+        SELECT
+        T.TYPE_ID,
+        T.TYPE_NM,
+        T.CATEGORY_ID,
+        C.CATEGORY_NM,
+        T.DISP_ORD,
+        T.TYPE_FORM,
+        FN_GET_CODE_NM('TYPE_FORM', T.TYPE_FORM) TYPE_FORM_NM,
+        T.TYPE_ORD_METHOD,
+        FN_GET_CODE_NM('TYPE_ORD_METHOD', T.TYPE_ORD_METHOD) TYPE_ORD_METHOD_NM,
+        T.CRE_DT,
+        TD.TYPE_DETAIL_ID,
+        TD.TYPE_DETAIL_NM,
+        TD.TYPE_ID AS DETAIL_TYPE_ID,
+        TD.DISP_ORD AS DETAIL_DISP_ORD,
+        TDS.TYPE_DETAIL_SHOP_ID,
+        TDS.TYPE_DETAIL_ID AS SHOP_TYPE_DETAIL_ID,
+        TDS.SHOP_ID,
+        TDS.DISP_ORD AS SHOP_DISP_ORD,
+        S.SHOP_ID AS SHOP_ID,
+        S.SHOP_NM AS SHOP_NM,
+        S.SHOP_TITLE AS SHOP_TITLE
+        FROM
+        TB_TYPE T
+        LEFT JOIN
+        TB_CATEGORY C ON T.CATEGORY_ID = C.CATEGORY_ID
+        LEFT JOIN
+        TB_TYPE_DETAIL TD ON T.TYPE_ID = TD.TYPE_ID
+        LEFT JOIN
+        TB_TYPE_DETAIL_SHOP TDS ON TD.TYPE_DETAIL_ID = TDS.TYPE_DETAIL_ID
+        LEFT JOIN
+        TB_SHOP S ON TDS.SHOP_ID = S.SHOP_ID
+        ORDER BY T.DISP_ORD
+    </select>
+
+    <insert id="insertType" parameterType="com.mapago.model.type.Type" useGeneratedKeys="true" keyProperty="typeId">
+        INSERT INTO TB_TYPE (type_nm, category_id, disp_ord, cre_id, upd_id, type_form, type_ord_method)
+        VALUES (
+        #{typeNm},
+        #{categoryId},
+        (SELECT COALESCE(MAX(B.DISP_ORD), 0) + 1 FROM TB_TYPE B),
+        #{creId},
+        #{updId},
+        #{typeForm},
+        #{typeOrdMethod}
+        )
+    </insert>
+
+    <update id="updateType" parameterType="com.mapago.model.type.Type" useGeneratedKeys="true" keyProperty="typeId">
+        UPDATE TB_TYPE A
+        JOIN (
+        SELECT COALESCE(MAX(B.DISP_ORD), 0) + 1 AS NEW_DISP_ORD
+        FROM TB_TYPE B
+        WHERE B.CATEGORY_ID = #{categoryId}
+        ) AS DISP_RESULT
+        SET A.TYPE_NM = #{typeNm},
+        A.CATEGORY_ID = #{categoryId},
+        A.CRE_ID = #{creId},
+        A.UPD_ID = #{updId},
+        A.TYPE_FORM = #{typeForm},
+        A.TYPE_ORD_METHOD = #{typeOrdMethod},
+        A.DISP_ORD = CASE WHEN (
+        SELECT CATEGORY_ID FROM (SELECT * FROM TB_TYPE) AS T WHERE T.TYPE_ID = A.TYPE_ID) != #{categoryId}
+        THEN DISP_RESULT.NEW_DISP_ORD
+        ELSE A.DISP_ORD
+        END
+        WHERE A.TYPE_ID = #{typeId}
+    </update>
+
+    <delete id="deleteType" parameterType="com.mapago.model.type.Type">
+        DELETE FROM TB_TYPE
+        WHERE TYPE_ID = #{typeId}
+    </delete>
+
+    <update id="sortType" parameterType="com.mapago.model.type.Type" useGeneratedKeys="true"
+            keyProperty="typeId">
+        UPDATE TB_TYPE
+        SET
+        DISP_ORD = #{dispOrd},
+        UPD_ID = #{updId}
+        WHERE TYPE_ID = #{typeId}
+    </update>
+</mapper>

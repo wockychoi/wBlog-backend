@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: mapago-application
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mawday2025@gmail.com
+    password: gyqemmditkgtxtid
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.otp.OtpMapper">
+
+    <select id="findOtp" resultType="com.mapago.model.otp.Otp">
+        SELECT
+        OTP_ID,
+        OTP_VALUE,
+        OBJ_ID,
+        CONFIRM_YN,
+        CRE_DT
+        FROM TB_OTP
+        WHERE OTP_ID = #{otpId}
+    </select>
+
+    <insert id="insertOtp" parameterType="com.mapago.model.otp.Otp" useGeneratedKeys="true" keyProperty="otpId">
+        INSERT INTO TB_OTP (OTP_VALUE, OBJ_ID, CRE_ID, UPD_ID)
+        VALUES (
+        #{otpValue},
+        #{objId},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+    <update id="updateOtpConfirmYn" parameterType="com.mapago.model.otp.Otp">
+        UPDATE TB_OTP
+        SET
+        CONFIRM_YN = #{confirmYn},
+        UPD_ID = #{updId}
+        WHERE OTP_ID = #{otpId}
+    </update>
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.user.UserLogMapper">
+
+    <insert id="insertUserLog" parameterType="com.mapago.model.user.UserLog" useGeneratedKeys="true"
+            keyProperty="logId">
+        INSERT INTO TB_USER_lOG ( USER_ID, LOG_TYPE, OBJ_ID, IP, CRE_ID, UPD_ID )
+        VALUES(
+        #{userId},
+        #{logType},
+        #{objId},
+        #{ip},
+        #{creId},
+        #{updId}
+        )
+    </insert>
+
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.area.AreaMapper">
+
+    <select id="findAreaProvinceList" parameterType="com.mapago.model.area.AreaProvince"
+            resultType="com.mapago.model.area.AreaProvince">
+        SELECT
+        A.AREA_PROVINCE_ID,
+        A.AREA_PROVINCE_NM
+        FROM TB_AREA_PROVINCE A
+        ORDER BY A.AREA_PROVINCE_ID
+    </select>
+
+    <select id="findAreaCityList" parameterType="com.mapago.model.area.AreaCity"
+            resultType="com.mapago.model.area.AreaCity">
+        SELECT
+        A.AREA_CITY_ID,
+        A.AREA_CITY_NM,
+        A.AREA_PROVINCE_ID
+        FROM TB_AREA_CITY A
+        WHERE A.AREA_PROVINCE_ID = #{areaProvinceId}
+        ORDER BY A.AREA_CITY_NM
+    </select>
+
+    <select id="findAreaStreetList" parameterType="com.mapago.model.area.AreaStreet"
+            resultType="com.mapago.model.area.AreaStreet">
+        SELECT
+        A.AREA_STREET_ID,
+        A.AREA_STREET_NM,
+        A.AREA_CITY_ID
+        FROM TB_AREA_STREET A
+        WHERE A.AREA_CITY_ID = #{areaCityId}
+        ORDER BY A.AREA_STREET_NM
+    </select>
+
+</mapper>

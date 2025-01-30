@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://kr-tdsql-04homyce.sql.tencentcdb.com:21070/mapago-dev
+    username: mapago
+    password: Adsf1324!@
+    driver-class-name: org.mariadb.jdbc.Driver
+
+logging:
+  level:
+    root: INFO
+    com.mapago: DEBUG
+
+tencent:
+  cos:
+    secret-id: IKID51yvjMnAMPK9szAEYnx41wpbDi5HIh9U
+    secret-key: Ws32qSHz7GID3vjR2Un06474tbf3HMH5
+    bucket-name: mapago-1328580670
+    region-name: ap-seoul
+    status: dev/
+    url: https://mapago-1328580670.cos.ap-seoul.myqcloud.com
+
+server:
+  port: 8080

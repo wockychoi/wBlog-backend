@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapago.mapper.file.FileMapper">
+
+    <select id="selectFilesByFileIds" resultType="com.mapago.model.file.File">
+        SELECT
+        FILE_ID,
+        SYS_FILE_NAME,
+        USER_FILE_NAME,
+        FILE_PATH,
+        FILE_SIZE,
+        FILE_EXT,
+        CONCAT('${tencentCosUrl}', '/', FILE_PATH, SYS_FILE_NAME) FILE_URL
+        FROM TB_FILE
+        WHERE FILE_ID IN
+        (
+        <foreach item="fileId" collection="fileIdList.split(',')" separator=",">
+            #{fileId}
+        </foreach>
+        )
+        <choose>
+            <when test="fileIdList != null and fileIdList != ''">
+                ORDER BY FIELD(FILE_ID,
+                <foreach item="fileId" collection="fileIdList.split(',')" separator=",">
+                    #{fileId}
+                </foreach>)
+            </when>
+            <otherwise>
+                ORDER BY 1
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="saveFile" parameterType="com.mapago.model.file.File" useGeneratedKeys="true" keyProperty="fileId">
+        INSERT INTO tb_file
+        (sys_file_name, user_file_name, file_path, file_size, file_ext,cre_id,upd_id)
+        VALUES( #{sysFileName}, #{userFileName}, #{filePath}, #{fileSize}, #{fileExt}, #{creId}, #{updId} );
+    </insert>
+
+    <delete id="deleteFile" parameterType="com.mapago.model.file.File">
+        DELETE FROM tb_file
+        WHERE file_id = #{file_id}
+    </delete>
+
+</mapper>
