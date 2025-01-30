@@ -1,4 +1,4 @@
-package com.mapago.controller.admin.user;
+package com.mapago.controller.admin.blog;
 
 import com.mapago.model.user.User;
 import com.mapago.service.user.UserService;
@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/api/user")
-public class AdmUserController {
+@RequestMapping("/admin/api/blog")
+public class BlogTestController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -71,8 +71,7 @@ public class AdmUserController {
         String password = loginRequest.get("password");
 
         // Selenium WebDriver 설정
-        System.setProperty("webdriver.chrome.driver",
-                "C:\\Users\\최우석\\.cache\\selenium\\chromedriver\\win64\\131.0.6778.204\\chromedriver.exe"); // chromedriver 경로 설정
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver"); // chromedriver 경로 설정
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--disable-gpu", "window-size=1920x1080", "--disable-extensions");
 
