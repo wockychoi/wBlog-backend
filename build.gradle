@@ -14,6 +14,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.json:json:20210307'
     implementation 'net.nurigo:sdk:4.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mariadb://kr-tdsql-04homyce.sql.tencentcdb.com:21070/mapago-dev
-    username: mapago
-    password: Adsf1324!@
-    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mysql://blog-database.cz0k82k0et9c.ap-northeast-2.rds.amazonaws.com:3306/blog_database?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: admin
+    password: wockyblog1!
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 logging:
   level:
