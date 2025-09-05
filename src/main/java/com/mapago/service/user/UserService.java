@@ -2,8 +2,8 @@ package com.mapago.service.user;
 
 import com.mapago.config.exception.CustomException;
 import com.mapago.mapper.user.UserMapper;
+import com.mapago.model.user.PostingLog;
 import com.mapago.model.user.User;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,6 +69,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public User updateUser(User user) throws Exception {
         int result = userMapper.updateUser(user);
+        int resultpoint = userMapper.updatePointUser(user);
         return Optional.ofNullable(user)
                 .filter(t -> result > 0)
                 .orElseThrow(() -> new CustomException("삭제할 사용자가 없습니다."));
@@ -76,6 +77,7 @@ public class UserService implements UserDetailsService {
 
     public User insertUser(User userRequest) throws Exception {
         userMapper.insertUser(userRequest);
+        userMapper.insertWallet(userRequest);
         return userRequest;
     }
 
@@ -85,5 +87,23 @@ public class UserService implements UserDetailsService {
             userMapper.insertUserRole(userRequest);
         }
 
+    }
+
+    public PostingLog insertPostingLog(PostingLog postingLog) throws Exception {
+        userMapper.insertPostingLog(postingLog);
+        userMapper.insertPointlog(postingLog);
+        return postingLog;
+    }
+
+    @Transactional
+    public User updatePointWallet(User user) throws Exception {
+        int result = userMapper.updatePointWallet(user);
+        return userMapper.findByUserId(user.getUserId());
+    }
+
+    @Transactional
+    public User savePostKey(User user) throws Exception {
+        int result = userMapper.savePostKey(user);
+        return userMapper.findByUserId(user.getUserId());
     }
 }

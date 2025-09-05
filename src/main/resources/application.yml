@@ -14,3 +14,23 @@ spring:
             enable: true
           ssl:
             trust: smtp.gmail.com
+  datasource:
+    url: jdbc:mysql://blog-database.cz0k82k0et9c.ap-northeast-2.rds.amazonaws.com:3306/blog_database?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: admin
+    password: wockyblog1!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    root: INFO
+    com.mapago: DEBUG
+
+tencent:
+  cos:
+    secret-id: IKID51yvjMnAMPK9szAEYnx41wpbDi5HIh9U
+    secret-key: Ws32qSHz7GID3vjR2Un06474tbf3HMH5
+    bucket-name: mapago-1328580670
+    region-name: ap-seoul
+    status: dev/
+    url: https://mapago-1328580670.cos.ap-seoul.myqcloud.com
+

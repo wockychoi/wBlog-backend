@@ -44,6 +44,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.4.6'
+    implementation 'org.json:json:20231013'
+    implementation 'org.jsoup:jsoup:1.15.4' // 버전은 최신이거나 안정된 걸로
 }
 
 tasks.named('test') {

@@ -15,19 +15,12 @@
 
     <select id="findByUserId" parameterType="String" resultType="com.mapago.model.user.User">
         SELECT
-        U.USER_ID,
-        U.USER_NM,
-        U.USE_YN,
-        U.EMAIL,
-        U.BIRTH_DAY,
-        U.NICKNAME,
-        U.GENDER,
-        U.KAKAO_ID,
-        U.APPLE_ID,
-        U.NAVER_ID,
-        U.PHONE_NUMBER,
-        U.PROFILE_IMAGE
+        U.*
+        ,B.POINT_BALANCE
+        ,B.POST_KEY
         FROM TB_USER U
+        INNER JOIN TB_POINT_WALLET B
+        ON U.USER_ID = B.USER_ID
         WHERE U.USER_ID = #{userId}
     </select>
 
@@ -58,30 +51,57 @@
     </select>
 
     <select id="getUserList" resultType="com.mapago.model.user.User">
-        SELECT
-        U.*
-        FROM TB_USER U
+        SELECT A.USER_ID,
+        A.USER_NM,
+        A.PASSWORD,
+        A.EMAIL,
+        A.BIRTH_DAY,
+        A.PHONE_NUMBER,
+        A.USE_YN,
+        A.RECOMMENDER_ID,
+        B.POINT_BALANCE
+        FROM TB_USER A
+        INNER JOIN TB_POINT_WALLET B
+        ON A.USER_ID = B.USER_ID
+        ORDER BY CRE_DT, USE_YN DESC
     </select>
 
-    <update id="updateUser" parameterType="com.mapago.model.user.User" useGeneratedKeys="true"
-            keyProperty="userId">
+    <update id="updateUser" parameterType="com.mapago.model.user.User">
         UPDATE TB_USER
         SET
         USE_YN = #{useYn}
-        WHERE USER_ID = #{userId}
+        WHERE USER_ID = #{userId};
+    </update>
+
+    <update id="updatePointUser" parameterType="com.mapago.model.user.User">
+        UPDATE TB_POINT_WALLET
+        SET
+        POINT_BALANCE = #{pointBalance}
+        WHERE USER_ID = #{userId};
     </update>
 
     <insert id="insertUser" parameterType="com.mapago.model.user.User" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO TB_USER (USER_ID, USER_NM, PASSWORD, CRE_ID, UPD_ID, USE_YN, EMAIL, NICKNAME)
+        INSERT INTO TB_USER (USER_ID, USER_NM, PASSWORD, EMAIL, PHONE_NUMBER, RECOMMENDER_ID, USE_YN ,CRE_DT,
+        CRE_ID,UPD_ID)
         VALUES(
         #{userId},
         #{userNm},
         #{password},
-        #{userId},
-        #{userId},
-        'Y',
         #{email},
-        #{nickname}
+        #{phoneNumber},
+        #{recommenderId},
+        'Y',
+        sysdate(),
+        'dev01',
+        'dev01'
+        )
+    </insert>
+
+    <insert id="insertWallet" parameterType="com.mapago.model.user.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO TB_POINT_WALLET (USER_ID, POINT_BALANCE)
+        VALUES(
+        #{userId},
+        0
         )
     </insert>
 
@@ -94,4 +114,41 @@
         CASE WHEN #{updId} IS NOT NULL AND #{updId} != '' THEN #{updId} ELSE #{userId} END
         )
     </insert>
+
+    <insert id="insertPostingLog" parameterType="com.mapago.model.user.PostingLog">
+        INSERT INTO TB_POST_LOG (USER_ID, BLOG_ACCOUNT_ID, TITLE, STATUS, CREATED_AT)
+        VALUES(
+        #{userId},
+        #{blogAccountId},
+        #{title},
+        #{status},
+        #{createdAt}
+        )
+    </insert>
+
+    <insert id="insertPointlog" parameterType="com.mapago.model.user.PostingLog">
+        INSERT INTO TB_POINT_HISTORY (USER_ID, AMOUNT, TYPE, DESCRIPTION, CREATED_AT)
+        VALUES(
+        #{userId},
+        #{amount},
+        #{type},
+        #{description},
+        #{createdAt}
+        )
+    </insert>
+
+    <update id="updatePointWallet" parameterType="com.mapago.model.user.User">
+        UPDATE TB_POINT_WALLET
+        SET POINT_BALANCE = POINT_BALANCE + CAST(#{deductPoint} AS SIGNED)
+        WHERE user_id = #{userId}
+        AND POINT_BALANCE + CAST(#{deductPoint} AS SIGNED) >= 0
+    </update>
+
+    <update id="savePostKey" parameterType="com.mapago.model.user.User">
+        UPDATE TB_POINT_WALLET
+        SET
+        POST_KEY = #{postKey}
+        WHERE USER_ID = #{siteId};
+    </update>
+
 </mapper>
